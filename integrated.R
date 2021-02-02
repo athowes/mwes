@@ -55,17 +55,56 @@ dat <- list(n_obs = n_obs,
             S = S)
   
 # The number of warm-up iterations in the MCMC
-nsim_warm <- 10
+nsim_warm <- 100
 
 # The number of iterations in the MCMC after warm-up
-nsim_iter <- 90
+nsim_iter <- 900
 
 fit <- rstan::stan("integrated.stan",
                    data = dat,
                    warmup = nsim_warm,
                    iter = nsim_iter)
 
-samples <- rstan::extract(fit)
+# Samples per second outside of warm-up phase
+times <- get_elapsed_time(fit)
+nsim_iter / mean(times[, 2])
 
-plot(samples$beta_0) # Intercept
-plot(samples$l) # Length-scale
+chain <- rstan::extract(fit)
+
+plot(chain$beta_0) # Intercept
+plot(chain$l) # Length-scale
+
+# Version which accepts unequal numbers of samples in each area
+
+# Data structure for unequal number of points in each area
+sample_index <- sf::st_intersects(sf, samples)
+sample_lengths <- lengths(sample_index)
+start_index <- sapply(sample_index, function(x) x[1])
+
+dat_unequal <- list(n_obs = n_obs,
+                    n_mis = n_mis,
+                    ii_obs = array(ii_obs),
+                    ii_mis = array(ii_mis),
+                    n = nrow(sf),
+                    y_obs = sf$y[ii_obs],
+                    m = sf$n_obs,
+                    mu = rep(0, nrow(sf)),
+                    sample_lengths = sample_lengths,
+                    total_samples = sum(sample_lengths),
+                    start_index = start_index,
+                    S = S)
+
+fit_unequal <- rstan::stan("unequal-integrated.stan",
+                           data = dat_unequal,
+                           warmup = nsim_warm,
+                           iter = nsim_iter)
+
+times_unequal <- get_elapsed_time(fit_unequal)
+nsim_iter / mean(times_unequal[, 2])
+
+chain_unequal <- rstan::extract(fit_unequal)
+
+plot(chain_unequal$beta_0) # Intercept
+plot(chain_unequal$l) # Length-scale
+plot(chain_unequal$sigma_phi) # Standard deviation
+plot(chain_unequal$tau_phi) # Precision
