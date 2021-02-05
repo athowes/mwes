@@ -1,5 +1,5 @@
-fit_centroid <- readRDS("fit_centroid.rds")
-fit_integrated <- readRDS("fit_integrated.rds")
+fit_centroid <- readRDS("data/fit_centroid.rds")
+fit_integrated <- readRDS("data/fit_integrated.rds")
 
 # Sampling speed
 

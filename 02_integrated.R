@@ -3,7 +3,7 @@ library(rstan)
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 
-sf <- readRDS(file = "mw.rds")
+sf <- readRDS(file = "data/mw.rds")
 
 # The number of integration points within each area
 L <- 5
@@ -57,12 +57,12 @@ dat <- list(n_obs = n_obs,
 nsim_warm <- 100
 nsim_iter <- 400
 
-fit <- rstan::stan("integrated.stan",
+fit <- rstan::stan("stan/integrated.stan",
                    data = dat,
                    warmup = nsim_warm,
                    iter = nsim_iter)
 
-saveRDS(fit, file = "fit_integrated.rds")
+saveRDS(fit, file = "data/fit_integrated.rds")
 
 # Version which accepts unequal numbers of samples in each area
 
@@ -84,9 +84,9 @@ dat_unequal <- list(n_obs = n_obs,
                     start_index = start_index,
                     S = S)
 
-fit_unequal <- rstan::stan("unequal-integrated.stan",
+fit_unequal <- rstan::stan("stan/unequal-integrated.stan",
                            data = dat_unequal,
                            warmup = nsim_warm,
                            iter = nsim_iter)
 
-saveRDS(fit_unequal, file = "fit_unequal.rds")
+saveRDS(fit_unequal, file = "data/fit_unequal.rds")

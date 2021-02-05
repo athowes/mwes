@@ -3,7 +3,7 @@ library(rstan)
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 
-sf <- readRDS(file = "mw.rds")
+sf <- readRDS(file = "data/mw.rds")
 
 centroid_distance <- function(sf) {
   cent <- sf::st_centroid(sf)
@@ -31,9 +31,9 @@ dat <- list(n_obs = n_obs,
 nsim_warm <- 100
 nsim_iter <- 400
 
-fit <- rstan::stan("centroid.stan",
+fit <- rstan::stan("stan/centroid.stan",
                    data = dat,
                    warmup = nsim_warm,
                    iter = nsim_iter)
 
-saveRDS(fit, file = "fit_centroid.rds")
+saveRDS(fit, file = "data/fit_centroid.rds")
