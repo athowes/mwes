@@ -1,5 +1,7 @@
 library(sf)
 library(rstan)
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
 
 sf <- readRDS(file = "mw.rds")
 
@@ -26,18 +28,12 @@ dat <- list(n_obs = n_obs,
             mu = rep(0, nrow(sf)),
             D = D)
 
-# The number of warm-up iterations in the MCMC
-nsim_warm <- 10
-
-# The number of iterations in the MCMC after warm-up
-nsim_iter <- 90
+nsim_warm <- 100
+nsim_iter <- 400
 
 fit <- rstan::stan("centroid.stan",
                    data = dat,
                    warmup = nsim_warm,
                    iter = nsim_iter)
 
-samples <- rstan::extract(fit)
-
-plot(samples$beta_0) # Intercept
-plot(samples$l) # Length-scale
+saveRDS(fit, file = "fit_centroid.rds")

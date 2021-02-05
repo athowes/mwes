@@ -1,10 +1,12 @@
 library(sf)
 library(rstan)
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
 
 sf <- readRDS(file = "mw.rds")
 
 # The number of integration points within each area
-L <- 10
+L <- 5
 
 # The method for selecting integration points
 type <- "random"
@@ -32,17 +34,15 @@ plot_samples(samples)
 
 # Construct an (L * n) * (L * n) matrix containing the Euclidean distance between each sample
 # Note that this ^ will not be exact for some settings of type (hexagonal, regular)
-# I should add code to force it to be though since Stan requires matrix dimensions
 S <- sf::st_distance(samples, samples)
 dim(S)
 
-# This is required when some observations are missing (cross-validation)
+# Only required when some observations are missing (cross-validation)
 ii_obs <- which(!is.na(sf$y))
 ii_mis <- which(is.na(sf$y))
 n_obs <- length(ii_obs)
 n_mis <- length(ii_mis)
 
-# Creating the data structure
 dat <- list(n_obs = n_obs,
             n_mis = n_mis,
             ii_obs = array(ii_obs),
@@ -54,25 +54,15 @@ dat <- list(n_obs = n_obs,
             L = L,
             S = S)
   
-# The number of warm-up iterations in the MCMC
 nsim_warm <- 100
-
-# The number of iterations in the MCMC after warm-up
-nsim_iter <- 900
+nsim_iter <- 400
 
 fit <- rstan::stan("integrated.stan",
                    data = dat,
                    warmup = nsim_warm,
                    iter = nsim_iter)
 
-# Samples per second outside of warm-up phase
-times <- get_elapsed_time(fit)
-nsim_iter / mean(times[, 2])
-
-chain <- rstan::extract(fit)
-
-plot(chain$beta_0) # Intercept
-plot(chain$l) # Length-scale
+saveRDS(fit, file = "fit_integrated.rds")
 
 # Version which accepts unequal numbers of samples in each area
 
@@ -99,12 +89,4 @@ fit_unequal <- rstan::stan("unequal-integrated.stan",
                            warmup = nsim_warm,
                            iter = nsim_iter)
 
-times_unequal <- get_elapsed_time(fit_unequal)
-nsim_iter / mean(times_unequal[, 2])
-
-chain_unequal <- rstan::extract(fit_unequal)
-
-plot(chain_unequal$beta_0) # Intercept
-plot(chain_unequal$l) # Length-scale
-plot(chain_unequal$sigma_phi) # Standard deviation
-plot(chain_unequal$tau_phi) # Precision
+saveRDS(fit_unequal, file = "fit_unequal.rds")
