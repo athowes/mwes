@@ -29,11 +29,11 @@ dat <- list(n_obs = n_obs,
             D = D)
 
 nsim_warm <- 100
-nsim_iter <- 400
+nsim_iter <- 1000
 
 fit <- rstan::stan("stan/centroid.stan",
                    data = dat,
                    warmup = nsim_warm,
                    iter = nsim_iter)
 
-saveRDS(fit, file = "data/fit_centroid.rds")
+saveRDS(fit, file = "data/centroid.rds")
