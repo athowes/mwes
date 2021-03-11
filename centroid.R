@@ -13,17 +13,8 @@ centroid_distance <- function(sf) {
 
 D <- centroid_distance(sf)
 
-ii_obs <- which(!is.na(sf$y))
-ii_mis <- which(is.na(sf$y))
-n_obs <- length(ii_obs)
-n_mis <- length(ii_mis)
-
-dat <- list(n_obs = n_obs,
-            n_mis = n_mis,
-            ii_obs = array(ii_obs),
-            ii_mis = array(ii_mis),
-            n = nrow(sf),
-            y_obs = sf$y[ii_obs],
+dat <- list(n = nrow(sf),
+            y = sf$y,
             m = sf$n_obs,
             mu = rep(0, nrow(sf)),
             D = D)

@@ -37,23 +37,13 @@ plot_samples(samples)
 S <- sf::st_distance(samples, samples)
 dim(S)
 
-# Only required when some observations are missing (cross-validation)
-ii_obs <- which(!is.na(sf$y))
-ii_mis <- which(is.na(sf$y))
-n_obs <- length(ii_obs)
-n_mis <- length(ii_mis)
-
 # Data structure for unequal number of points in each area
 sample_index <- sf::st_intersects(sf, samples)
 sample_lengths <- lengths(sample_index)
 start_index <- sapply(sample_index, function(x) x[1])
 
-dat <- list(n_obs = n_obs,
-            n_mis = n_mis,
-            ii_obs = array(ii_obs),
-            ii_mis = array(ii_mis),
-            n = nrow(sf),
-            y_obs = sf$y[ii_obs],
+dat <- list(n = nrow(sf),
+            y = sf$y,
             m = sf$n_obs,
             mu = rep(0, nrow(sf)),
             sample_lengths = sample_lengths,
@@ -62,7 +52,7 @@ dat <- list(n_obs = n_obs,
             S = S)
 
 fit <- rstan::stan("stan/integrated.stan",
-                   data = dat_unequal,
+                   data = dat,
                    warmup = nsim_warm,
                    iter = nsim_iter)
 
