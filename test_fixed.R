@@ -41,3 +41,4 @@ summary_stan["tau_phi", ]
 phi_mean_inla <- fit_inla$summary.random$id[, "mean"]
 phi_mean_stan <- summary_stan[2:(1 + 28), "mean"]
 plot(phi_mean_inla, phi_mean_stan)
+abline(a = 0, b = 1)
