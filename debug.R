@@ -41,6 +41,9 @@ fit_inla$summary.hyperpar
 summary_stan["tau_phi", ]
 
 plot(fit_inla$summary.random$id[, "mean"], summary_stan[2:(1 + 28), "mean"])
+abline(a = 0, b = 1 / summary_stan["sigma_phi", "mean"])
+
+plot(fit_inla$summary.fitted.values[, "mean"], summary_stan[60:(59 + 28), "mean"])
 abline(a = 0, b = 1)
 
 # debug-01.stan: fixed lengthscale, Gram matrix passed in outright
@@ -61,6 +64,9 @@ fit_inla_01$summary.hyperpar
 summary_stan["tau_phi", ]
 
 plot(fit_inla_01$summary.random$id[, "mean"], summary_stan[2:(1 + 28), "mean"])
+abline(a = 0, b = 1 / summary_stan["sigma_phi", "mean"])
+
+plot(fit_inla$summary.fitted.values[, "mean"], summary_stan[60:(59 + 28), "mean"])
 abline(a = 0, b = 1)
 
 # debug-02.stan: integers to remove xbinomial
@@ -88,5 +94,32 @@ summary_stan["beta_0", ]
 fit_inla_02$summary.hyperpar
 summary_stan["tau_phi", ]
 
-plot(fit_inla_02$summary.$id[, "mean"], summary_stan[2:(1 + 28), "mean"])
+plot(fit_inla_02$summary.random$id[, "mean"], summary_stan[2:(1 + 28), "mean"])
+abline(a = 0, b = 1 / summary_stan["sigma_phi", "mean"])
+
+plot(fit_inla$summary.fitted.values[, "mean"], summary_stan[60:(59 + 28), "mean"])
+abline(a = 0, b = 1)
+
+# More samples?
+
+fit_inla_03 <- fit_inla_02
+
+fit_stan_03 <- rstan::stan("stan/debug-02.stan",
+                           data = list(n = nrow(sf), y = floor(sf$y), m = floor(sf$n_obs), mu = rep(0, nrow(sf)), K = cov),
+                           warmup = 100,
+                           iter = 10000)
+
+summary_stan <- rstan::summary(fit_stan_02)$summary
+
+# Compare
+fit_inla_03$summary.fixed
+summary_stan["beta_0", ]
+
+fit_inla_03$summary.hyperpar
+summary_stan["tau_phi", ]
+
+plot(fit_inla_03$summary.random$id[, "mean"], summary_stan[2:(1 + 28), "mean"])
+abline(a = 0, b = 1 / summary_stan["sigma_phi", "mean"])
+
+plot(fit_inla$summary.fitted.values[, "mean"], summary_stan[60:(59 + 28), "mean"])
 abline(a = 0, b = 1)
