@@ -54,7 +54,6 @@ model {
   // I could do this?
   // matrix[n, n] L = cholesky_decompose(K);
   // y ~ multi_normal_cholesky(mu, L);
-  l ~ gamma(1, 1);
   sigma_phi ~ normal(0, 2.5); // Weakly informative prior
   beta_0 ~ normal(-2, 1);
   phi ~ multi_normal(mu, K);
